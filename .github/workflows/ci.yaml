@@ -1,0 +1,36 @@
+name: CI/CD Docker Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build: # ID del Job
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log into Docker Hub
+        uses: docker/login-action@v3 # Acción dedicada a la autenticación.
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }} # Usa el Secret de GitHub
+          password: ${{ secrets.DOCKER_PASSWORD }} # Usa el Secret de GitHub
+      
+      # 3. Build y Push
+      - name: Build and push Docker image
+       
+        uses: docker/build-push-action@v5 #Versión mas estable de la acción oficial de Docker
+        with:
+          context: ./docker/frontend           # Indicamos la ruta donde está tu Dockerfile (ajusta si es necesario)       
+          push: true           # Crucial: Indica que debe hacer el 'docker push'   
+          tags: lucasmpalu/frontend:${{ github.run_number }}
+          tags: lucasmpalu/backend:${{ github.run_number }}
+          tags: lucasmpalu/db-migrator:${{ github.run_number }}
+
+          # Opcional: Para usar la caché y acelerar builds futuros
+          cache-from: type=gha 
+          cache-to: type=gha,mode=max
