@@ -87,11 +87,11 @@ jobs:
 
     - name: Build Backend PHP Image
       run: |
-        docker build -t lucasmpalus/backend:${{ env.IMAGE_TAG }} -f ./backend/Dockerfile ./backend
+        docker build -t lucasmpalu/backend:${{ env.IMAGE_TAG }} -f ./backend/Dockerfile ./backend
         
     - name: Build Frontend Nginx Image
       run: |
-        docker build -t lucasmpalus/frontend:${{ env.IMAGE_TAG }} -f ./frontend/Dockerfile ./frontend
+        docker build -t lucasmpalu/frontend:${{ env.IMAGE_TAG }} -f ./frontend/Dockerfile ./frontend
 
     - name: Push Images
       run: |
