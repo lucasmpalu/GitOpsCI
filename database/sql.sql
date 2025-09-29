@@ -40,7 +40,7 @@ CREATE TABLE consultas (
 INSERT INTO pacientes (nombre, apellido, fecha_nacimiento, telefono, email)
 VALUES 
 ('Lucas', 'Palú', '1996-05-20', '+55-99999-1111', 'lucas@example.com'),
-('María', 'Gómez', '1988-03-15', '+55-99999-2222', 'maria@example.com');
+('María', 'Gomez', '1988-03-15', '+55-99999-2222', 'maria@example.com');
 
 INSERT INTO medicos (nombre, apellido, especialidad)
 VALUES
