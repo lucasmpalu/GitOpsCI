@@ -56,7 +56,7 @@ jobs:
       run: |
         find ./frontend -name '*.js' -exec eslint {} \;
 
-    gitleaks-scan:
+  gitleaks-scan:
       runs-on: ubuntu-latest
       needs: compile-and-test # Esto asegura que este job se ejecute después del job de compilación y pruebas
       steps:
