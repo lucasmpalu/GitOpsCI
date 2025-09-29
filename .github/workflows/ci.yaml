@@ -4,7 +4,15 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
+    bran    - name: Build Backend PHP Image
+      run: |
+        docker build -t lucasmpalu/backend:${{ env.IMAGE_TAG }} -f ./backend/Dockerfile ./backend
+        docker images | grep lucasmpalu/backend
+        
+    - name: Build Frontend Nginx Image
+      run: |
+        docker build -t lucasmpalu/frontend:${{ env.IMAGE_TAG }} -f ./frontend/Dockerfile ./frontend
+        docker images | grep lucasmpalu/frontend main ]
 
 permissions:
   # Esto es requerido para que **GitHub Actions** pueda escribir en el repositorio, 
