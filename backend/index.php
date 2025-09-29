@@ -32,7 +32,7 @@ if ($stmt->execute()) {if ($stmt->execute()) {
 
     echo "Paciente registrado com sucesso";    echo "Paciente registrado com sucesso";
 
-} else {} else {
+} else {
 
     echo "Error: " . $stmt->error;    echo "Error: " . $stmt->error;
 
