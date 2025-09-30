@@ -10,6 +10,8 @@ permissions:
   # Esto es requerido para que **GitHub Actions** pueda escribir en el repositorio, 
   # por ejemplo, creando una nueva etiqueta (tag) o liberando (releasing) artefactos.
   contents: write
+
+  #Las variables env, estarán disponible en todo el workflow ya que están a nivel "global" y no en un job/step
 env:
   IMAGE_TAG: ${{ github.sha }} #El sha es un identificador único para cada commit
 
@@ -17,7 +19,6 @@ env:
 jobs:
   compile-and-test: # Esto es solo un nombre descriptivo del job (puede ser cualquier nombre)
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -82,8 +83,8 @@ jobs:
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+        username: ${{ secrets.DOCKER_USERNAME }} # Se puede guardar como variable
+        password: ${{ secrets.DOCKER_PASSWORD }} # Se guarda como secret
 
     - name: Build Backend PHP Image
       run: |
@@ -97,3 +98,36 @@ jobs:
       run: |
         docker push lucasmpalu/backend:${{ env.IMAGE_TAG }}
         docker push lucasmpalu/frontend:${{ env.IMAGE_TAG }}
+  
+  update_cd_repo:
+    runs-on: ubuntu-latest
+    needs: build # Esto asegura que este job se ejecute después del job de build
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        repository: lucasmpalu/GitOpsCD     # Repositorio de CD, si no coloco esto, checkout clona el repo actual (CI)
+        ref: main                           # Rama del repo de CD
+        token: ${{ secrets.CD_REPO_TOKEN }} # Token con permisos para escribir en el repo de CD
+        path: cd_repo                       # ➡️ Clona el repo de CD en un subdirectorio cd_repo temporal en la máquina virtual
+    
+    - name: Update CD Repository
+      working-directory: ./cd_repo  # ⬅️ Cambia al subdirectorio cd
+      # sed = stream editor, acá esto diciendolé que voy a cambiar todo lo que haya después de "tag" por IMAGE_TAG
+      run: |
+        sed -i "s|\(tag:\s*\).*|\1\"${IMAGE_TAG}\"|" backend/values.yaml
+        sed -i "s|\(tag:\s*\).*|\1\"${IMAGE_TAG}\"|" frontend/values.yaml
+
+    - name: Commit & push changes
+      working-directory: ./cd_repo  # ⬅️ Cambia al subdirectorio cd
+      # Como ya configuramos el token en los secretos y luego nos autenticamos en el paso de checkout,
+      # no es necesario hacer un git remote set-url con el token
+      # ni poner un usuario/email real, ya que el token identifica al bot
+      # El token está en el Secret del repo, y luego la autenticación que hicimos arriba dura todo el job
+      # IMAGE_TAG 
+      run: |
+        git config user.name "ci-bot"
+        git config user.email "ci-bot@users.noreply.github.com"
+        git add -A
+        git commit -m "Update image tag to ${IMAGE_TAG}" || echo "No changes to commit"
+        git push
